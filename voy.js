@@ -1,0 +1,1 @@
+document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Joueur_Test</td><td>68175360</td></tr><tr><td>lulu</td><td>10000020</td></tr><tr><td>Carmine</td><td>100</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
