@@ -1,1 +1,1 @@
-
+document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Joueur_Test</td><td>27200</td></tr><tr><td>Phil</td><td>14000</td></tr><tr><td>Chrebie</td><td>6000</td></tr><tr><td>Cebonvieuxkeke</td><td>7200</td></tr><tr><td>Michelenthongs</td><td>7200</td></tr><tr><td>Jeff4tw</td><td>17200</td></tr><tr><td>Kenn</td><td>3200</td><tr><td>Larcher</td><td>14200</td></tr></tr><tr><td>Vinu</td><td>1200</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
