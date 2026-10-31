@@ -1,1 +1,1 @@
-document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Joueur_Test</td><td>27200</td></tr><tr><td>Phil</td><td>14000</td></tr><tr><td>Chrebie</td><td>7070</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
+ERROR SAME REQUEST WITHIN A SECOND|4|0||8/26/2014 5:54:48 PM|0
