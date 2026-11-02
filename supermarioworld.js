@@ -1,2 +1,2 @@
-document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Chrebie</td><td>400</td></tr></table>');
-document.write('Leaderboard is empty2.');
+document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Chrebie</td><td>500</td></tr>');
+document.write('<tr><th>Name</th><th>Score</th></tr><tr><td>Phil</td><td>450</td></tr></table>');
