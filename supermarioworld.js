@@ -1,1 +1,1 @@
-document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th><th>Seconds</th></tr><tr><td>Chrebie</td><td>46870</td><td>159</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
+document.write('Leaderboard is empty.');
