@@ -1,1 +1,1 @@
-document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th><th>Seconds</th></tr><tr><td>Chrebie</td><td>32550</td><td>143</td></tr><tr><td>Phil</td><td>1000</td><td>23</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
+ERROR:Unknown verb
