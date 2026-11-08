@@ -128,7 +128,7 @@
     <script type="text/javascript">
         async function loadLeaderboard() {
             try {
-                // Lecture du fichier brut sur GitHub (avec anti-cache)
+                // Lecture du fichier brut sur GitHub avec destruction du cache
                 const response = await fetch('supermarioworld.js?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Fichier introuvable");
                 
@@ -136,7 +136,7 @@
                 const tbody = document.getElementById('leaderboard-body');
                 tbody.innerHTML = ""; 
 
-                // On découpe le fichier ligne par ligne
+                // Découpe le fichier ligne par ligne
                 let lines = textData.split('\n').filter(line => line.trim() !== "");
 
                 if (lines.length === 0) {
@@ -144,9 +144,8 @@
                     return;
                 }
 
-                // Pour chaque ligne de données brutes
                 lines.forEach((line, index) => {
-                    // Structure d'une ligne d'export Pipe de Dreamlo : Pseudo|Score|Secondes|Date
+                    // Structure brute Pipe de Dreamlo : Pseudo|Score|Secondes|Date
                     let parts = line.split('|');
                     
                     if (parts.length >= 3) {
@@ -157,17 +156,17 @@
                         tdPos.innerText = (index + 1);
                         tr.appendChild(tdPos);
 
-                        // 2. Joueur
+                        // 2. Joueur (Index 0)
                         let tdName = document.createElement('td');
                         tdName.innerText = parts[0];
                         tr.appendChild(tdName);
 
-                        // 3. Score
+                        // 3. Score (Index 1)
                         let tdScore = document.createElement('td');
                         tdScore.innerText = parts[1];
                         tr.appendChild(tdScore);
 
-                        // 4. Conversion des Secondes brutes (Index 2) en MM:SS
+                        // 4. Temps en secondes (Index 2)
                         let tdTime = document.createElement('td');
                         let totalSeconds = parseInt(parts[2], 10) || 0;
                         
@@ -202,6 +201,7 @@
 
         window.addEventListener("DOMContentLoaded", loadLeaderboard);
     </script>
+
 
 </body>
 </html>
