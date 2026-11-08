@@ -1,1 +1,1 @@
-document.write('<table class="dreamloLBTable"><tr><th>Name</th><th>Score</th></tr><tr><td>Phil</td><td>4400</td></tr></table><!-- Leaderboard provided by: www.dreamlo.com -->');
+Phil|3600|0||11/8/2026 1:05:40 AM|0
