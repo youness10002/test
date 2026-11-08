@@ -124,57 +124,62 @@
         <script src="supermarioworld.js" type="text/javascript"></script>
     </div>
 
-    <!-- Script de formatage intelligent du temps (Secondes -> HH:MM:SS ou MM:SS) -->
+       <!-- Script de formatage intelligent du temps (Secondes -> HH:MM:SS ou MM:SS) -->
     <script type="text/javascript">
         function reformatDreamloTimer() {
-            // Sélectionne toutes les lignes de données générées par la table Dreamlo
+            // Sélectionne toutes les lignes du tableau généré par Dreamlo
             let rows = document.querySelectorAll(".dreamloLBTable tr");
             
             rows.forEach((row, index) => {
-                // On ignore la première ligne (index 0) qui correspond aux en-têtes du tableau
+                // On ignore la première ligne qui correspond aux en-têtes (Name, Score, etc.)
                 if (index === 0) return;
 
                 let cells = row.getElementsByTagName("td");
-                // La structure standard de Dreamlo génère : [Rang/Nom, Score, Secondes, Date...]
-                // Les secondes brutes se trouvent généralement dans la 3ème colonne (index 2)
-                if (cells.length >= 3) {
-                    let timerCell = cells[2];
-                    let totalSeconds = parseInt(timerCell.innerText || timerCell.textContent, 10);
+                
+                // SÉCURITÉ : On parcourt toutes les cellules de la ligne pour trouver les secondes
+                for (let i = 0; i < cells.length; i++) {
+                    let text = cells[i].innerText || cells[i].textContent;
+                    
+                    // On cherche une cellule qui contient uniquement un nombre 
+                    // et qui n'est pas le score principal (généralement situé avant ou après)
+                    // Dans le cas de /js-seconds-asc, la cellule du temps est repérable.
+                    let totalSeconds = parseInt(text.trim(), 10);
 
-                    if (!isNaN(totalSeconds)) {
+                    // Si c'est un nombre valide et qu'on est sur la colonne du temps (souvent la dernière ou l'avant-dernière)
+                    // On évite de convertir le pseudo ou le rang. On cible l'index 2 (3ème colonne) ou supérieur.
+                    if (!isNaN(totalSeconds) && i >= 2) {
                         let hours = Math.floor(totalSeconds / 3600);
                         let minutes = Math.floor((totalSeconds % 3600) / 60);
                         let seconds = totalSeconds % 60;
 
                         let formattedTime = "";
 
-                        // Formatage intelligent en fonction de la durée détectée
                         if (hours > 0) {
-                            // Si le temps dépasse une heure, on affiche HH:MM:SS
                             let hh = hours < 10 ? "0" + hours : hours;
                             let mm = minutes < 10 ? "0" + minutes : minutes;
                             let ss = seconds < 10 ? "0" + seconds : seconds;
                             formattedTime = hh + ":" + mm + ":" + ss;
                         } else {
-                            // Sinon, affichage standard sur deux chiffres MM:SS
                             let mm = minutes < 10 ? "0" + minutes : minutes;
                             let ss = seconds < 10 ? "0" + seconds : seconds;
                             formattedTime = mm + ":" + ss;
                         }
 
-                        // Remplacement de la valeur brute par la version horloge pixel art
-                        timerCell.innerText = formattedTime;
+                        // Remplacement de la valeur brute par l'horloge formatée
+                        cells[i].innerText = formattedTime;
+                        break; // On a trouvé et converti le temps pour cette ligne, on passe à la suite
                     }
                 }
             });
         }
 
-        // On attend que la page et le script externe de GitHub / Dreamlo soient entièrement chargés
+        // Attente du chargement complet de la page et du script GitHub
         window.addEventListener("load", () => {
-            // Un léger délai de 500ms garantit que la table HTML est bien injectée dans le DOM avant de la modifier
-            setTimeout(reformatDreamloTimer, 500);
+            // Un délai de 800ms pour s'assurer que Dreamlo a fini d'injecter la table HTML
+            setTimeout(reformatDreamloTimer, 800);
         });
     </script>
+
 
 </body>
 </html>
