@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIAVG Super Mario World Leaderboard</title>
     
-    <!-- Importation d'une police Pixel Art Google Fonts -->
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com" rel="stylesheet">
@@ -42,6 +41,7 @@
             background: rgba(11, 3, 20, 0.85);
             border-radius: 10px;
             box-shadow: 0 0 20px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.5);
+            min-width: 500px;
         }
 
         .dreamloLBTable { 
@@ -110,65 +110,99 @@
     <h1>🏆 High Scores 🏆</h1>
 
     <div class="arcade-container">
-        <!-- Le script Dreamlo va générer sa table ".dreamloLBTable" automatiquement ici -->
-        <script src="supermarioworld.js" type="text/javascript"></script>
+        <table class="dreamloLBTable" id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Joueur</th>
+                    <th>Score</th>
+                    <th>Temps</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <!-- Les lignes de scores seront générées ici par le script -->
+                <tr><td colspan="4" style="color: #ffff00;">Chargement des scores...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script type="text/javascript">
-        function adjustAndFormatTable() {
-            // 1. Force l'ajout de la colonne de titre "TEMPS" dans les en-têtes du tableau
-            let headerRow = document.querySelector(".dreamloLBTable tr");
-            if (headerRow) {
-                let ths = headerRow.getElementsByTagName("th");
-                // Si la colonne Temps n'est pas encore écrite, on l'ajoute proprement
-                if (ths.length === 2) {
-                    let newTh = document.createElement("th");
-                    newTh.innerText = "TEMPS";
-                    newTh.style.color = "#ffff00";
-                    newTh.style.textShadow = "0 0 5px #ffff00";
-                    headerRow.appendChild(newTh);
+        async function loadLeaderboard() {
+            try {
+                // Récupère le fichier JSON mis à jour par votre C# sur GitHub
+                // Note : Ajustez le nom du fichier si vous gardez .js ou passez en .json (.js fonctionne aussi si c'est du JSON dedans)
+                const response = await fetch('supermarioworld.js');
+                if (!response.ok) throw new Error("Fichier introuvable");
+                
+                const data = await response.json();
+                const tbody = document.getElementById('leaderboard-body');
+                tbody.innerHTML = ""; // On vide le message de chargement
+
+                // Extraction de la liste des entrées dreamlo
+                let entries = [];
+                if (data.dreamlo && data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
+                    let entryData = data.dreamlo.leaderboard.entry;
+                    entries = Array.isArray(entryData) ? entryData : [entryData];
                 }
-            }
 
-            // 2. Parcourt les lignes du tableau pour formater la valeur brute des secondes
-            let rows = document.querySelectorAll(".dreamloLBTable tr");
-            rows.forEach((row, index) => {
-                if (index === 0) return; // On saute la ligne d'en-tête
+                if (entries.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">Aucun score disponible</td></tr>';
+                    return;
+                }
 
-                let cells = row.getElementsByTagName("td");
-                // Avec le format de base /js, l'index 2 (3ème cellule) contient les secondes brutes
-                if (cells.length >= 3) {
-                    let timerCell = cells[2];
-                    let totalSeconds = parseInt(timerCell.innerText || timerCell.textContent, 10);
+                // Génération des lignes du tableau
+                entries.forEach((entry, index) => {
+                    let tr = document.createElement('tr');
 
-                    if (!isNaN(totalSeconds)) {
-                        let hours = Math.floor(totalSeconds / 3600);
-                        let minutes = Math.floor((totalSeconds % 3600) / 60);
-                        let seconds = totalSeconds % 60;
+                    // 1. Position / Rang
+                    let tdPos = document.createElement('td');
+                    tdPos.innerText = (index + 1);
+                    tr.appendChild(tdPos);
 
-                        let formattedTime = "";
-                        if (hours > 0) {
-                            let hh = hours < 10 ? "0" + hours : hours;
-                            let mm = minutes < 10 ? "0" + minutes : minutes;
-                            let ss = seconds < 10 ? "0" + seconds : seconds;
-                            formattedTime = hh + ":" + mm + ":" + ss;
-                        } else {
-                            let mm = minutes < 10 ? "0" + minutes : minutes;
-                            let ss = seconds < 10 ? "0" + seconds : seconds;
-                            formattedTime = mm + ":" + ss;
-                        }
+                    // 2. Pseudo du joueur
+                    let tdName = document.createElement('td');
+                    tdName.innerText = entry.name;
+                    tr.appendChild(tdName);
 
-                        // Applique le format horloge
-                        timerCell.innerText = formattedTime;
+                    // 3. Score principal
+                    let tdScore = document.createElement('td');
+                    tdScore.innerText = entry.score;
+                    tr.appendChild(tdScore);
+
+                    // 4. Conversion et formatage des secondes (champ "seconds" ou "text" dans l'API JSON dreamlo)
+                    let tdTime = document.createElement('td');
+                    let totalSeconds = parseInt(entry.seconds || entry.text, 10) || 0;
+                    
+                    let hours = Math.floor(totalSeconds / 3600);
+                    let minutes = Math.floor((totalSeconds % 3600) / 60);
+                    let seconds = totalSeconds % 60;
+
+                    let formattedTime = "";
+                    if (hours > 0) {
+                        let hh = hours < 10 ? "0" + hours : hours;
+                        let mm = minutes < 10 ? "0" + minutes : minutes;
+                        let ss = seconds < 10 ? "0" + seconds : seconds;
+                        formattedTime = hh + ":" + mm + ":" + ss;
+                    } else {
+                        let mm = minutes < 10 ? "0" + minutes : minutes;
+                        let ss = seconds < 10 ? "0" + seconds : seconds;
+                        formattedTime = mm + ":" + ss;
                     }
-                }
-            });
+
+                    tdTime.innerText = formattedTime;
+                    tr.appendChild(tdTime);
+
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="4" style="color:#ff007f;">Erreur de synchronisation</td></tr>';
+            }
         }
 
-        // On attend que la table soit injectée pour la transformer
-        window.addEventListener("load", () => {
-            setTimeout(adjustAndFormatTable, 800);
-        });
+        // Lancement immédiat au chargement de la page
+        window.addEventListener("DOMContentLoaded", loadLeaderboard);
     </script>
 
 </body>
