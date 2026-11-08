@@ -8,11 +8,9 @@
     <!-- Importation d'une police Pixel Art Google Fonts -->
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://googleapis.com" rel="stylesheet">
 
     <style type="text/css">
-        /* Fond d'écran style salle d'arcade sombre 0b0314 05010a*/
-        /*#0f001e #22897e*/
         body {
             background-color: #0b0314;
             color: #fff;
@@ -28,7 +26,6 @@
             background-image: radial-gradient(circle, #1a082e 0%, #22897e 100%);
         }
 
-        /* Titre principal style néon clignotant */
         h1 {
             color: #00ffff;
             font-size: 24px;
@@ -39,7 +36,6 @@
             animation: flicker 2s infinite alternate;
         }
 
-        /* Conteneur de la borne d'arcade */
         .arcade-container {
             border: 4px solid #ff007f;
             padding: 30px;
@@ -48,10 +44,9 @@
             box-shadow: 0 0 20px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.5);
         }
 
-        /* Le Tableau Dreamlo */
         .dreamloLBTable { 
             border-collapse: separate;
-            border-spacing: 0 10px; /* Espace entre les lignes */
+            border-spacing: 0 10px; 
             text-align: center;
             width: 100%;
             max-width: 650px; 
@@ -59,9 +54,8 @@
             letter-spacing: 1px;
         }
 
-        /* En-tête du tableau (Colonnes) */
         .dreamloLBTable th { 
-            color: #ffff00; /* Jaune rétro */
+            color: #ffff00; 
             border-bottom: 3px dashed #ffff00;
             font-weight: bold;
             text-transform: uppercase;
@@ -69,23 +63,21 @@
             text-shadow: 0 0 5px #ffff00;
         }
 
-        /* Lignes du tableau (Joueurs et scores) */
         .dreamloLBTable td { 
             background: rgba(255, 255, 255, 0.03);
             border-top: 2px solid #3d105a;
             border-bottom: 2px solid #3d105a;
             padding: 20px; 
-            color: #00ff66; /* Vert matrice/arcade */
+            color: #00ff66; 
             text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
             transition: all 0.3s ease;
         }
 
-        /* Bordures intérieures gauche/droite pour simuler des cases */
         .dreamloLBTable td:first-child {
             border-left: 2px solid #3d105a;
             border-top-left-radius: 4px;
             border-bottom-left-radius: 4px;
-            color: #ff007f; /* Rang/Pseudo en rose flashy */
+            color: #ff007f; 
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
 
@@ -95,7 +87,6 @@
             border-bottom-right-radius: 4px;
         }
 
-        /* Effet au survol d'une ligne */
         .dreamloLBTable tr:hover td {
             background: rgba(0, 255, 255, 0.1);
             color: #ffffff;
@@ -103,7 +94,6 @@
             cursor: pointer;
         }
 
-        /* Animation pour l'effet néon du titre */
         @keyframes flicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
                 text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
@@ -119,41 +109,44 @@
 
     <h1>🏆 High Scores 🏆</h1>
 
-    <div class="arcade-container" id="leaderboard-wrapper">
+    <div class="arcade-container">
         <!-- Le script Dreamlo va générer sa table ".dreamloLBTable" automatiquement ici -->
         <script src="supermarioworld.js" type="text/javascript"></script>
     </div>
 
-       <!-- Script de formatage intelligent du temps (Secondes -> HH:MM:SS ou MM:SS) -->
     <script type="text/javascript">
-        function reformatDreamloTimer() {
-            // Sélectionne toutes les lignes du tableau généré par Dreamlo
+        function adjustAndFormatTable() {
+            // 1. Force l'ajout de la colonne de titre "TEMPS" dans les en-têtes du tableau
+            let headerRow = document.querySelector(".dreamloLBTable tr");
+            if (headerRow) {
+                let ths = headerRow.getElementsByTagName("th");
+                // Si la colonne Temps n'est pas encore écrite, on l'ajoute proprement
+                if (ths.length === 2) {
+                    let newTh = document.createElement("th");
+                    newTh.innerText = "TEMPS";
+                    newTh.style.color = "#ffff00";
+                    newTh.style.textShadow = "0 0 5px #ffff00";
+                    headerRow.appendChild(newTh);
+                }
+            }
+
+            // 2. Parcourt les lignes du tableau pour formater la valeur brute des secondes
             let rows = document.querySelectorAll(".dreamloLBTable tr");
-            
             rows.forEach((row, index) => {
-                // On ignore la première ligne qui correspond aux en-têtes (Name, Score, etc.)
-                if (index === 0) return;
+                if (index === 0) return; // On saute la ligne d'en-tête
 
                 let cells = row.getElementsByTagName("td");
-                
-                // SÉCURITÉ : On parcourt toutes les cellules de la ligne pour trouver les secondes
-                for (let i = 0; i < cells.length; i++) {
-                    let text = cells[i].innerText || cells[i].textContent;
-                    
-                    // On cherche une cellule qui contient uniquement un nombre 
-                    // et qui n'est pas le score principal (généralement situé avant ou après)
-                    // Dans le cas de /js-seconds-asc, la cellule du temps est repérable.
-                    let totalSeconds = parseInt(text.trim(), 10);
+                // Avec le format de base /js, l'index 2 (3ème cellule) contient les secondes brutes
+                if (cells.length >= 3) {
+                    let timerCell = cells[2];
+                    let totalSeconds = parseInt(timerCell.innerText || timerCell.textContent, 10);
 
-                    // Si c'est un nombre valide et qu'on est sur la colonne du temps (souvent la dernière ou l'avant-dernière)
-                    // On évite de convertir le pseudo ou le rang. On cible l'index 2 (3ème colonne) ou supérieur.
-                    if (!isNaN(totalSeconds) && i >= 2) {
+                    if (!isNaN(totalSeconds)) {
                         let hours = Math.floor(totalSeconds / 3600);
                         let minutes = Math.floor((totalSeconds % 3600) / 60);
                         let seconds = totalSeconds % 60;
 
                         let formattedTime = "";
-
                         if (hours > 0) {
                             let hh = hours < 10 ? "0" + hours : hours;
                             let mm = minutes < 10 ? "0" + minutes : minutes;
@@ -165,24 +158,22 @@
                             formattedTime = mm + ":" + ss;
                         }
 
-                        // Remplacement de la valeur brute par l'horloge formatée
-                        cells[i].innerText = formattedTime;
-                        break; // On a trouvé et converti le temps pour cette ligne, on passe à la suite
+                        // Applique le format horloge
+                        timerCell.innerText = formattedTime;
                     }
                 }
             });
         }
 
-        // Attente du chargement complet de la page et du script GitHub
+        // On attend que la table soit injectée pour la transformer
         window.addEventListener("load", () => {
-            // Un délai de 800ms pour s'assurer que Dreamlo a fini d'injecter la table HTML
-            setTimeout(reformatDreamloTimer, 800);
+            setTimeout(adjustAndFormatTable, 800);
         });
     </script>
 
-
 </body>
 </html>
+
 
 
 
