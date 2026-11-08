@@ -41,7 +41,7 @@
             background: rgba(11, 3, 20, 0.85);
             border-radius: 10px;
             box-shadow: 0 0 20px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.5);
-            min-width: 500px;
+            min-width: 550px;
         }
 
         .dreamloLBTable { 
@@ -110,7 +110,7 @@
     <h1>🏆 High Scores 🏆</h1>
 
     <div class="arcade-container">
-        <table class="dreamloLBTable" id="leaderboard-table">
+        <table class="dreamloLBTable">
             <thead>
                 <tr>
                     <th>Pos</th>
@@ -120,7 +120,6 @@
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
-                <!-- Les lignes de scores seront générées ici par le script -->
                 <tr><td colspan="4" style="color: #ffff00;">Chargement des scores...</td></tr>
             </tbody>
         </table>
@@ -129,84 +128,84 @@
     <script type="text/javascript">
         async function loadLeaderboard() {
             try {
-                // Récupère le fichier JSON mis à jour par votre C# sur GitHub
-                // Note : Ajustez le nom du fichier si vous gardez .js ou passez en .json (.js fonctionne aussi si c'est du JSON dedans)
-                const response = await fetch('supermarioworld.js');
+                // Lecture du fichier brut sur GitHub (avec anti-cache)
+                const response = await fetch('supermarioworld.js?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Fichier introuvable");
                 
-                const data = await response.json();
+                const textData = await response.text();
                 const tbody = document.getElementById('leaderboard-body');
-                tbody.innerHTML = ""; // On vide le message de chargement
+                tbody.innerHTML = ""; 
 
-                // Extraction de la liste des entrées dreamlo
-                let entries = [];
-                if (data.dreamlo && data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
-                    let entryData = data.dreamlo.leaderboard.entry;
-                    entries = Array.isArray(entryData) ? entryData : [entryData];
-                }
+                // On découpe le fichier ligne par ligne
+                let lines = textData.split('\n').filter(line => line.trim() !== "");
 
-                if (entries.length === 0) {
+                if (lines.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4">Aucun score disponible</td></tr>';
                     return;
                 }
 
-                // Génération des lignes du tableau
-                entries.forEach((entry, index) => {
-                    let tr = document.createElement('tr');
-
-                    // 1. Position / Rang
-                    let tdPos = document.createElement('td');
-                    tdPos.innerText = (index + 1);
-                    tr.appendChild(tdPos);
-
-                    // 2. Pseudo du joueur
-                    let tdName = document.createElement('td');
-                    tdName.innerText = entry.name;
-                    tr.appendChild(tdName);
-
-                    // 3. Score principal
-                    let tdScore = document.createElement('td');
-                    tdScore.innerText = entry.score;
-                    tr.appendChild(tdScore);
-
-                    // 4. Conversion et formatage des secondes (champ "seconds" ou "text" dans l'API JSON dreamlo)
-                    let tdTime = document.createElement('td');
-                    let totalSeconds = parseInt(entry.seconds || entry.text, 10) || 0;
+                // Pour chaque ligne de données brutes
+                lines.forEach((line, index) => {
+                    // Structure d'une ligne d'export Pipe de Dreamlo : Pseudo|Score|Secondes|Date
+                    let parts = line.split('|');
                     
-                    let hours = Math.floor(totalSeconds / 3600);
-                    let minutes = Math.floor((totalSeconds % 3600) / 60);
-                    let seconds = totalSeconds % 60;
+                    if (parts.length >= 3) {
+                        let tr = document.createElement('tr');
 
-                    let formattedTime = "";
-                    if (hours > 0) {
-                        let hh = hours < 10 ? "0" + hours : hours;
-                        let mm = minutes < 10 ? "0" + minutes : minutes;
-                        let ss = seconds < 10 ? "0" + seconds : seconds;
-                        formattedTime = hh + ":" + mm + ":" + ss;
-                    } else {
-                        let mm = minutes < 10 ? "0" + minutes : minutes;
-                        let ss = seconds < 10 ? "0" + seconds : seconds;
-                        formattedTime = mm + ":" + ss;
+                        // 1. Position / Rang
+                        let tdPos = document.createElement('td');
+                        tdPos.innerText = (index + 1);
+                        tr.appendChild(tdPos);
+
+                        // 2. Joueur
+                        let tdName = document.createElement('td');
+                        tdName.innerText = parts[0];
+                        tr.appendChild(tdName);
+
+                        // 3. Score
+                        let tdScore = document.createElement('td');
+                        tdScore.innerText = parts[1];
+                        tr.appendChild(tdScore);
+
+                        // 4. Conversion des Secondes brutes (Index 2) en MM:SS
+                        let tdTime = document.createElement('td');
+                        let totalSeconds = parseInt(parts[2], 10) || 0;
+                        
+                        let hours = Math.floor(totalSeconds / 3600);
+                        let minutes = Math.floor((totalSeconds % 3600) / 60);
+                        let seconds = totalSeconds % 60;
+
+                        let formattedTime = "";
+                        if (hours > 0) {
+                            let hh = hours < 10 ? "0" + hours : hours;
+                            let mm = minutes < 10 ? "0" + minutes : minutes;
+                            let ss = seconds < 10 ? "0" + seconds : seconds;
+                            formattedTime = hh + ":" + mm + ":" + ss;
+                        } else {
+                            let mm = minutes < 10 ? "0" + minutes : minutes;
+                            let ss = seconds < 10 ? "0" + seconds : seconds;
+                            formattedTime = mm + ":" + ss;
+                        }
+
+                        tdTime.innerText = formattedTime;
+                        tr.appendChild(tdTime);
+
+                        tbody.appendChild(tr);
                     }
-
-                    tdTime.innerText = formattedTime;
-                    tr.appendChild(tdTime);
-
-                    tbody.appendChild(tr);
                 });
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="4" style="color:#ff007f;">Erreur de synchronisation</td></tr>';
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="4" style="color:#ff007f;">Erreur de chargement</td></tr>';
             }
         }
 
-        // Lancement immédiat au chargement de la page
         window.addEventListener("DOMContentLoaded", loadLeaderboard);
     </script>
 
 </body>
 </html>
+
 
 
 
