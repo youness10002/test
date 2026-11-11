@@ -90,11 +90,10 @@
                     <th>Pos</th>
                     <th>Joueur</th>
                     <th>Score</th>
-                    <th>Temps</th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
-                <tr><td colspan="4" style="color: #ffff00;">Chargement du tableau autonome...</td></tr>
+                <tr><td colspan="3" style="color: #ffff00;">Chargement du tableau...</td></tr>
             </tbody>
         </table>
     </div>
@@ -102,7 +101,7 @@
     <script type="text/javascript">
         async function loadLeaderboard() {
             try {
-                // Lecture du fichier de lignes brutes géré par votre C#
+                // Lecture de votre fichier brut actuel sur GitHub
                 const response = await fetch('supermarioworld.js?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Fichier introuvable");
                 
@@ -110,17 +109,19 @@
                 const tbody = document.getElementById('leaderboard-body');
                 tbody.innerHTML = ""; 
 
+                // Découpage ligne par ligne
                 let lines = textData.split('\n').filter(line => line.trim() !== "");
 
                 if (lines.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">Aucun score disponible</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3">Aucun score disponible</td></tr>';
                     return;
                 }
 
+                // Affichage direct des données stables de votre fichier
                 lines.forEach((line, index) => {
                     let parts = line.split('|');
                     
-                    if (parts.length >= 3) {
+                    if (parts.length >= 2) {
                         let tr = document.createElement('tr');
 
                         // 1. Position
@@ -128,20 +129,15 @@
                         tdPos.innerText = (index + 1);
                         tr.appendChild(tdPos);
 
-                        // 2. Joueur
+                        // 2. Joueur (Ex: Phil)
                         let tdName = document.createElement('td');
                         tdName.innerText = parts[0];
                         tr.appendChild(tdName);
 
-                        // 3. Score
+                        // 3. Score (Ex: 4000)
                         let tdScore = document.createElement('td');
                         tdScore.innerText = parts[1];
                         tr.appendChild(tdScore);
-
-                        // 4. Temps (Plus besoin de calculs compliqués, le C# l'envoie déjà tout cuit !)
-                        let tdTime = document.createElement('td');
-                        tdTime.innerText = parts[2]; 
-                        tr.appendChild(tdTime);
 
                         tbody.appendChild(tr);
                     }
@@ -149,7 +145,7 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="4" style="color:#ff007f;">Erreur de chargement</td></tr>';
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3" style="color:#ff007f;">Erreur de chargement</td></tr>';
             }
         }
 
