@@ -90,10 +90,11 @@
                     <th>Pos</th>
                     <th>Joueur</th>
                     <th>Score</th>
+                    <th>Temps</th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
-                <tr><td colspan="3" style="color: #ffff00;">Chargement du tableau...</td></tr>
+                <tr><td colspan="4" style="color: #ffff00;">Chargement du tableau...</td></tr>
             </tbody>
         </table>
     </div>
@@ -101,7 +102,7 @@
     <script type="text/javascript">
         async function loadLeaderboard() {
             try {
-                // Lecture de votre fichier brut actuel sur GitHub
+                // Lecture du fichier sur GitHub avec destruction du cache
                 const response = await fetch('supermarioworld.js?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Fichier introuvable");
                 
@@ -113,31 +114,54 @@
                 let lines = textData.split('\n').filter(line => line.trim() !== "");
 
                 if (lines.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3">Aucun score disponible</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4">Aucun score disponible</td></tr>';
                     return;
                 }
 
-                // Affichage direct des données stables de votre fichier
                 lines.forEach((line, index) => {
+                    // Analyse structurelle de votre ligne brute : Pseudo|Score|Secondes|...
                     let parts = line.split('|');
                     
-                    if (parts.length >= 2) {
+                    if (parts.length >= 3) {
                         let tr = document.createElement('tr');
 
-                        // 1. Position
+                        // 1. Colonne POSITION
                         let tdPos = document.createElement('td');
                         tdPos.innerText = (index + 1);
                         tr.appendChild(tdPos);
 
-                        // 2. Joueur (Ex: Phil)
+                        // 2. Colonne JOUEUR (Index 0, ex: Phil)
                         let tdName = document.createElement('td');
                         tdName.innerText = parts[0];
                         tr.appendChild(tdName);
 
-                        // 3. Score (Ex: 4000)
+                        // 3. Colonne SCORE (Index 1, ex: 4000)
                         let tdScore = document.createElement('td');
                         tdScore.innerText = parts[1];
                         tr.appendChild(tdScore);
+
+                        // 4. Colonne TEMPS (Index 2, ex: 0)
+                        let tdTime = document.createElement('td');
+                        let totalSeconds = parseInt(parts[2], 10) || 0;
+                        
+                        let hours = Math.floor(totalSeconds / 3600);
+                        let minutes = Math.floor((totalSeconds % 3600) / 60);
+                        let seconds = totalSeconds % 60;
+
+                        let formattedTime = "";
+                        if (hours > 0) {
+                            let hh = hours < 10 ? "0" + hours : hours;
+                            let mm = minutes < 10 ? "0" + minutes : minutes;
+                            let ss = seconds < 10 ? "0" + seconds : seconds;
+                            formattedTime = hh + ":" + mm + ":" + ss;
+                        } else {
+                            let mm = minutes < 10 ? "0" + minutes : minutes;
+                            let ss = seconds < 10 ? "0" + seconds : seconds;
+                            formattedTime = mm + ":" + ss;
+                        }
+
+                        tdTime.innerText = formattedTime;
+                        tr.appendChild(tdTime);
 
                         tbody.appendChild(tr);
                     }
@@ -145,7 +169,7 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3" style="color:#ff007f;">Erreur de chargement</td></tr>';
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="4" style="color:#ff007f;">Erreur de chargement</td></tr>';
             }
         }
 
