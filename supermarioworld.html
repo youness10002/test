@@ -75,6 +75,7 @@
             transition: all 0.3s ease;
         }
 
+        /* La toute première colonne (Position injectée) prend la couleur rose flashy */
         .dreamloLBTable td:first-child {
             border-left: 2px solid #3d105a;
             border-top-left-radius: 4px;
@@ -96,9 +97,9 @@
             cursor: pointer;
         }
 
-        @keyframes flicker {
+        @keyframes flicker { 
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
-            20%, 24%, 55% { text-shadow: none; color: #004444; }
+            20%, 24%, 55% { text-shadow: none; color: #004444; } 
         }
     </style>
 </head>
@@ -107,38 +108,50 @@
     <h1>🏆 High Scores 🏆</h1>
 
     <div class="arcade-container" id="leaderboard-container">
-        <!-- APPEL NATIF DU SCRIPT : Dreamlo génère le tableau HTML ici automatiquement -->
+        <!-- Le script Dreamlo d'origine qui injecte la table de base -->
         <script src="supermarioworld.js" type="text/javascript"></script>
     </div>
 
     <script type="text/javascript">
-        function formatExistingTable() {
-            // On récupère la table générée par votre script Dreamlo d'origine
+        function adjustAndFormatTable() {
             let table = document.querySelector(".dreamloLBTable");
             if (!table) return;
 
-            // 1. AJOUT DE L'EN-TÊTE HORIZONTALE "TEMPS" SI ABSENTE
+            // 1. INJECTION DE L'EN-TÊTE "POS" TOUT À GAUCHE
             let headerRow = table.querySelector("tr");
             if (headerRow) {
                 let ths = headerRow.getElementsByTagName("th");
-                // Si Dreamlo n'a créé que Position, Nom, Score (3 colonnes)
-                if (ths.length === 3) {
+                // On vérifie le nombre de colonnes initiales de Dreamlo (souvent 3 avec Name, Score, Seconds)
+                // Pour éviter d'ajouter la colonne en double si la fonction s'exécute deux fois
+                if (ths[0] && ths[0].innerText !== "POS") {
                     let newTh = document.createElement("th");
-                    newTh.innerText = "TEMPS";
-                    headerRow.appendChild(newTh);
+                    newTh.innerText = "POS";
+                    // Insertion tout au début avant le premier en-tête (Name)
+                    headerRow.insertBefore(newTh, headerRow.firstChild);
+                }
+
+                // SÉCURITÉ COLLATION TEMPS : Si l'en-tête "TEMPS" à la fin n'existe pas, on la crée
+                if (ths.length === 3) { // POS (0) + Name (1) + Score (2), il manque le titre du Temps
+                    let timeTh = document.createElement("th");
+                    timeTh.innerText = "TEMPS";
+                    headerRow.appendChild(timeTh);
                 }
             }
 
-            // 2. CONVERSION DES CELLULES DE TEMPS EN MM:SS
+            // 2. INJECTION DES NUMÉROS DE POSITION ET CONVERSION DU CHRONO
             let rows = table.querySelectorAll("tr");
             rows.forEach((row, index) => {
                 if (index === 0) return; // On ignore les en-têtes
 
                 let cells = row.getElementsByTagName("td");
                 
-                // Si la ligne contient bien la colonne des secondes (3ème ou 4ème index selon l'export Dreamlo)
-                if (cells.length >= 3) {
-                    // Cible la cellule du temps (généralement la dernière de la ligne générée)
+                if (cells.length >= 2) {
+                    // --- AJOUT DE LA CASE POSITION À GAUCHE ---
+                    let tdPos = document.createElement("td");
+                    tdPos.innerText = index; // 1 pour la première ligne, 2 pour la deuxième, etc.
+                    row.insertBefore(tdPos, row.firstChild);
+
+                    // --- FORMATAGE DU CHRONO (Désormais situé sur la toute dernière cellule de la ligne) ---
                     let targetCell = cells[cells.length - 1]; 
                     let totalSeconds = parseInt(targetCell.innerText || targetCell.textContent, 10);
 
@@ -159,20 +172,20 @@
                             formattedTime = mm + ":" + ss;
                         }
 
-                        // On écrase le nombre brut par la version horloge
                         targetCell.innerText = formattedTime;
                     }
                 }
             });
         }
 
-        // Exécution sécurisée après injection complète de la table Dreamlo dans la page
+        // Lancement une fois la table injectée dans la page par Dreamlo
         window.addEventListener("load", () => {
-            setTimeout(formatExistingTable, 500);
+            setTimeout(adjustAndFormatTable, 500);
         });
     </script>
 </body>
 </html>
+
 
 
 
