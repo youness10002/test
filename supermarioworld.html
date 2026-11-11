@@ -110,6 +110,41 @@
     <div class="arcade-container" id="leaderboard-container">
         <!-- Le script Dreamlo d'origine qui injecte la table de base -->
         <script src="supermarioworld.js" type="text/javascript"></script>
+        <script type="text/javascript">
+    function ajouterColonnePosition() {
+        // On cible le tableau généré par Dreamlo
+        let table = document.querySelector(".dreamloLBTable");
+        if (!table) return;
+
+        let rows = table.querySelectorAll("tr");
+        
+        rows.forEach((row, index) => {
+            // Sécurité anti-doublon : si la colonne POS est déjà là, on ne fait rien
+            if (row.getAttribute("data-pos-added") === "true") return;
+
+            if (index === 0) {
+                // 1. Sur la ligne des titres : on ajoute l'en-tête "POS" tout à gauche
+                let thPos = document.createElement("th");
+                thPos.innerText = "POS";
+                row.insertBefore(thPos, row.firstChild);
+            } else {
+                // 2. Sur les lignes de joueurs : on ajoute le numéro (1, 2, 3...) tout à gauche
+                let tdPos = document.createElement("td");
+                tdPos.innerText = index;
+                row.insertBefore(tdPos, row.firstChild);
+            }
+
+            // On marque la ligne comme traitée
+            row.setAttribute("data-pos-added", "true");
+        });
+    }
+
+    // On exécute le script 500ms après le chargement pour laisser le temps à Dreamlo d'écrire son tableau
+    window.addEventListener("load", () => {
+        setTimeout(ajouterColonnePosition, 500);
+    });
+</script>
+
     </div>
     
 </body>
