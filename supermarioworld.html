@@ -119,28 +119,28 @@
                 }
 
                 lines.forEach((line, index) => {
-                    // Analyse structurelle de votre ligne brute : Pseudo|Score|Secondes|...
+                    // Analyse structurelle de votre ligne brute : Pseudo|Score|Secondes
                     let parts = line.split('|');
                     
                     if (parts.length >= 3) {
                         let tr = document.createElement('tr');
 
-                        // 1. Colonne POSITION
+                        // 1. POSITION
                         let tdPos = document.createElement('td');
                         tdPos.innerText = (index + 1);
                         tr.appendChild(tdPos);
 
-                        // 2. Colonne JOUEUR (Index 0, ex: Phil)
+                        // 2. JOUEUR (Index 0)
                         let tdName = document.createElement('td');
                         tdName.innerText = parts[0];
                         tr.appendChild(tdName);
 
-                        // 3. Colonne SCORE (Index 1, ex: 4000)
+                        // 3. SCORE (Index 1)
                         let tdScore = document.createElement('td');
                         tdScore.innerText = parts[1];
                         tr.appendChild(tdScore);
 
-                        // 4. Colonne TEMPS (Index 2, ex: 0)
+                        // 4. TEMPS (Index 2)
                         let tdTime = document.createElement('td');
                         let totalSeconds = parseInt(parts[2], 10) || 0;
                         
